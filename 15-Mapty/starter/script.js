@@ -98,6 +98,11 @@ class App {
     }).addTo(this.#map);
 
     this.#map.on('click', this._showForm.bind(this));
+
+    this.#workouts.forEach(work => {
+      this._renderWorkout(work);
+      this.renderWorkoutMarker(work);
+    });
   }
 
   _showForm(mapE) {
@@ -148,7 +153,6 @@ class App {
 
       workout = new Running([lat, lng], distance, duration, cadence);
       this.#workouts.push(workout);
-      console.log(workout);
 
       // Render workout marker
       this.renderWorkoutMarker(workout);
@@ -170,8 +174,6 @@ class App {
         return alert('Inputs must be positive numbers');
       workout = new Cycling([lat, lng], distance, duration, elevation);
       this.#workouts.push(workout);
-      console.log(workout);
-
       // Render workout marker
       this.renderWorkoutMarker(workout);
 
@@ -272,15 +274,14 @@ class App {
 
   _getLocalStorage() {
     const data = JSON.parse(localStorage.getItem('workouts'));
-    console.log(data);
 
     if (!data) return;
     this.#workouts = data;
+  }
 
-    this.#workouts.forEach(work => {
-      this._renderWorkout(work);
-      this._render;
-    });
+  reset() {
+    localStorage.removeItem('workouts');
+    location.reload();
   }
 }
 
