@@ -3,14 +3,7 @@
 const btn = document.querySelector('.btn-country');
 const countriesContainer = document.querySelector('.countries');
 
-const request = new XMLHttpRequest();
-request.open('GET', 'https://restcountries.com/v2/name/canada');
-request.send();
-
-request.addEventListener('load', function () {
-  const [data] = JSON.parse(this.responseText);
-  console.log(data);
-
+const renderCountry = function (data) {
   const html = `
   <article class="country">
           <img class="country__img" src="${data.flag}" />
@@ -27,7 +20,36 @@ request.addEventListener('load', function () {
           </div>
         </article>
   `;
-});
+  countriesContainer.insertAdjacentHTML('beforeend', html);
+  countriesContainer.style.opacity = 1;
+};
+const getCountryAndNeighbour = function (country) {
+  const request = new XMLHttpRequest();
+  request.open('GET', `https://restcountries.com/v2/name/${country}`);
+  request.send();
+
+  request.addEventListener('load', function () {
+    const [data] = JSON.parse(this.responseText);
+    console.log(data);
+
+    renderCountry(data);
+
+    const [neighbour] = data.borders;
+    if (!neighbour) return;
+
+    const req2 = new XMLHttpRequest(
+      'GET',
+      `https://restcountries.com/v3.1/alpha/${neighbour}`
+    );
+    req2.send();
+    req2.addEventListener('load', function () {
+      console.log(this.responseText);
+    });
+  });
+};
+
+getCountryAndNeighbour('usa');
+getCountryAndNeighbour('canada');
 
 // NEW COUNTRIES API URL (use instead of the URL shown in videos):
 // https://restcountries.com/v2/name/portugal
