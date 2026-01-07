@@ -51,6 +51,11 @@ const getCountryAndNeighbour = function (country) {
 
 getCountryAndNeighbour('usa');
 */
+const renderError = function (msg) {
+  countriesContainer.insertAdjacentText('beforeend', msg);
+  countriesContainer.style.opacity = 1;
+};
+
 const renderCountry = function (data, className = '') {
   const html = `
   <article class="country ${className}">
@@ -76,7 +81,12 @@ const request = fetch('https://restcountries.com/v2/name/portugal');
 
 const getCountryData = function (country) {
   fetch(`https://restcountries.com/v2/name/${country}`)
-    .then(response => response.json())
+    .then(response => {
+      if (!response.ok) {
+        throw new Error(`Country Not Found (${response.status})`);
+      }
+      return response.json();
+    })
     .then(data => {
       renderCountry(data[0]);
       const neighbour = data[0].borders[0];
@@ -87,10 +97,21 @@ const getCountryData = function (country) {
       return fetch(`https://restcountries.com/v2/alpha/${neighbour}`);
     })
     .then(response => response.json())
-    .then(data => renderCountry(data, 'neighbour'));
+    .then(data => renderCountry(data, 'neighbour'))
+    .catch(err => {
+      console.error(`${err}`);
+      renderError(`Something went wrong ${err.message}. Try again`);
+    })
+    .finally(() => {
+      countriesContainer.style.opacity = 1;
+    });
 };
-getCountryData('canada');
 
+btn.addEventListener('click', function () {
+  getCountryData('canada');
+});
+
+getCountryData('fdakdfaj');
 // NEW COUNTRIES API URL (use instead of the URL shown in videos):
 // https://restcountries.com/v2/name/portugal
 
