@@ -322,197 +322,101 @@ const renderCountry = function (data, className = '') {
   countriesContainer.insertAdjacentHTML('beforeend', html);
   countriesContainer.style.opacity = 1;
 };
-*/
-
-/*
-const whereAmI = async function () {
-  try {
-    // Position
-    const pos = await getPosition();
-    const { latitude: lat, longitude: lng } = pos.coords;
-
-    // Geo Location
-    const resGeo = await fetch(
-      `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}`,
-    );
-
-    const dataGeo = await resGeo.json();
-    // console.log(dataGeo);
-
-    const res = await fetch(
-      `https://restcountries.com/v2/name/${dataGeo.countryName}`,
-    );
-
-    const data = await res.json();
-    renderCountry(data[0]);
-    return `You are in ${dataGeo.city}, ${dataGeo.countryName}`;
-  } catch (err) {
-    console.error(err);
-    renderError(`Something went wrong ${err.message}`);
-  }
-};
-console.log('1: Will get location');
-// const city = whereAmI();
-// console.log(city);
-whereAmI()
-  .then(city => console.log(`2: ${city}`))
-  .catch(err => console.error(`${err.message}`))
-  .finally(() => console.log(`3: finished getting location`));
-console.log('2: Finished getting location');
-*/
-
-/*
-const getJSON = function (url, errorMsg = 'Something went wrong') {
+const request = fetch('https://restcountries.com/v2/name/portugal');
+// console.log(request);
+const getJSON = function (url, errMsg = 'Something went wrong') {
   return fetch(url).then(response => {
-    if (!response.ok) throw new Error(`${errorMsg} (${response.status})`);
-
+    if (!response.ok) {
+      throw new Error(`${errMsg} (${response.status})`);
+    }
     return response.json();
   });
 };
 
-//////////////////////////////////////////////////
-// parallel promises
-const get3Countries = async function (c1, c2, c3) {
-  try {
-    //   const [data1] = await getJSON(`https://restcountries.com/v2/name/${c1}`);
-    //   const [data2] = await getJSON(`https://restcountries.com/v2/name/${c2}`);
-    //   const [data3] = await getJSON(`https://restcountries.com/v2/name/${c3}`);
+const getCountryData = function (country) {
+  getJSON(`https://restcountries.com/v2/name/${country}`, 'Country Not Found')
+    .then(data => {
+      renderCountry(data[0]);
+      const neighbour = data[0].borders[0];
 
-    const data = await Promise.all([
-      getJSON(`https://restcountries.com/v2/name/${c1}`),
-      getJSON(`https://restcountries.com/v2/name/${c2}`),
-      getJSON(`https://restcountries.com/v2/name/${c3}`),
-    ]);
+      if (!neighbour) {
+        throw new Error('No Neighbour Found!');
+      }
 
-    console.log(data.map(d => d[0].capital));
-  } catch (err) {
-    console.error(err);
-  }
+      //Country 2
+      return getJSON(
+        `https://restcountries.com/v2/alpha/${neighbour}`,
+        'Country Not Found'
+      );
+    })
+    .then(data => renderCountry(data, 'neighbour'))
+    .catch(err => {
+      console.error(`${err}`);
+      renderError(`Something went wrong ${err.message}. Try again`);
+    })
+    .finally(() => {
+      countriesContainer.style.opacity = 1;
+    });
 };
 
-get3Countries('canada', 'usa', 'spain');
-*/
+btn.addEventListener('click', function () {
+  getCountryData('australia');
+});
+// NEW COUNTRIES API URL (use instead of the URL shown in videos):
+// https://restcountries.com/v2/name/portugal
 
-/*
-/////////////////////////////////////////////
-// Promise combinators
-const getJSON = function (url, errorMsg = 'Something went wrong') {
-  return fetch(url).then(response => {
-    if (!response.ok) throw new Error(`${errorMsg} (${response.status})`);
-
-    return response.json();
-  });
-};
-(async function () {
-  const res = await Promise.race([
-    getJSON(`https://restcountries.com/v2/name/canada`),
-    getJSON(`https://restcountries.com/v2/name/spain`),
-    getJSON(`https://restcountries.com/v2/name/germany`),
-  ]);
-  console.log(res[0]);
-})();
-
-const timeout = function (sec) {
-  return new Promise(function (_, reject) {
-    setTimeout(function () {
-      reject(new Error('Request took too long'));
-    }, sec * 1000);
-  });
-};
-
-Promise.race([getJSON(`https://restcountries.com/v2/name/canada`), timeout(1)])
-  .then(res => console.log(res[0]))
-  .catch(err => console.error(err));
-  */
-
-////////////////////////////////////////
-// Coding challenge 3
+// NEW REVERSE GEOCODING API URL (use instead of the URL shown in videos):
+// https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}
 
 ///////////////////////////////////////
-// Coding Challenge #3
+// Coding Challenge #1
 
 /* 
+In this challenge you will build a function 'whereAmI' which renders a country ONLY based on GPS coordinates. For that, you will use a second API to geocode coordinates.
+
+Here are your tasks:
+
 PART 1
-Write an async function 'loadNPause' that recreates Coding Challenge #2, this time using async/await (only the part where the promise is consumed). Compare the two versions, think about the big differences, and see which one you like more.
-Don't forget to test the error handler, and to set the network speed to 'Fast 3G' in the dev tools Network tab.
+1. Create a function 'whereAmI' which takes as inputs a latitude value (lat) and a longitude value (lng) (these are GPS coordinates, examples are below).
+2. Do 'reverse geocoding' of the provided coordinates. Reverse geocoding means to convert coordinates to a meaningful location, like a city and country name. Use this API to do reverse geocoding: https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}.
+The AJAX call will be done to a URL with this format: https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=52.508&longitude=13.381. Use the fetch API and promises to get the data. Do NOT use the getJSON function we created, that is cheating 😉
+3. Once you have the data, take a look at it in the console to see all the attributes that you recieved about the provided location. Then, using this data, log a messsage like this to the console: 'You are in Berlin, Germany'
+4. Chain a .catch method to the end of the promise chain and log errors to the console
+5. This API allows you to make only 3 requests per second. If you reload fast, you will get this error with code 403. This is an error with the request. Remember, fetch() does NOT reject the promise in this case. So create an error to reject the promise yourself, with a meaningful error message.
 
 PART 2
-1. Create an async function 'loadAll' that receives an array of image paths 'imgArr';
-2. Use .map to loop over the array, to load all the images with the 'createImage' function (call the resulting array 'imgs')
-3. Check out the 'imgs' array in the console! Is it like you expected?
-4. Use a promise combinator function to actually get the images from the array 😉
-5. Add the 'paralell' class to all the images (it has some CSS styles).
+6. Now it's time to use the received data to render a country. So take the relevant attribute from the geocoding API result, and plug it into the countries API that we have been using.
+7. Render the country and catch any errors, just like we have done in the last lecture (you can even copy this code, no need to type the same code)
 
-TEST DATA: ['img/img-1.jpg', 'img/img-2.jpg', 'img/img-3.jpg']. To test, turn off the 'loadNPause' function.
+TEST COORDINATES 1: 52.508, 13.381 (Latitude, Longitude)
+TEST COORDINATES 2: 19.037, 72.873
+TEST COORDINATES 2: -33.933, 18.474
 
 GOOD LUCK 😀
 */
 
-const imgContainer = document.querySelector('.images');
-const wait = function (seconds) {
-  return new Promise(function (resolve) {
-    setTimeout(resolve, seconds * 1000);
-  });
-};
-const createImage = function (imgPath) {
-  return new Promise(function (resolve, reject) {
-    const img = document.createElement('img');
-    img.src = imgPath;
-
-    img.addEventListener('load', function () {
-      imgContainer.append(img);
-      resolve(img);
+//
+const whereAmI = function (lat, lng) {
+  fetch(
+    `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}`,
+  )
+    .then(response => {
+      if (!response.ok)
+        throw new Error(`Problem with geocoding ${response.status}`);
+      return response.json();
+    })
+    .then(data => {
+      console.log(`You are in ${data.city}, ${data.countryName}`);
+      return fetch(`https://restcountries.com/v2/name/${data.countryName}`)
+        .then(res => {
+          if (!res.ok) throw new Error(`Country not found (${res.status})`);
+          return res.json();
+        })
+        .then(data => renderCountry(data[0]));
+    })
+    .catch(err => {
+      console.error(`${err}`);
     });
-
-    img.addEventListener('error', function () {
-      reject(new Error('Image not found'));
-    });
-  });
 };
 
-// let currentImage;
-// createImage('img/img-1.jpg')
-//   .then(img => {
-//     currentImage = img;
-//     console.log('Image 1 loaded');
-//     wait(2)
-//       .then(() => {
-//         currentImage.style.display = 'none';
-//         return createImage('img/img-2.jpg');
-//       })
-//       .then(img => {
-//         currentImage = img;
-//         console.log('Image 2 Loaded');
-//         return wait(2).then(() => {
-//           currentImage.style.display - 'none';
-//           return createImage('img/img-3.jpg').then(img => {
-//             currentImage = img;
-//             console.log('Image 3 loaded');
-//             wait(2).then(() => {
-//               currentImage.style.display = 'none';
-//             });
-//           });
-//         });
-//       });
-//   })
-//   .catch(err => console.error(err));
-
-const loadNPause = async function () {
-  try {
-    let img = await createImage('img/img-1.jpg');
-    console.log('Image 1 loaded');
-
-    await wait(2);
-    img.style.display = 'none';
-
-    img = await createImage('img/img-2.jpg');
-    console.log('Image 2 loaded');
-
-    await wait(2);
-    img.style.display = 'none';
-  } catch (err) {
-    console.error(err.message);
-  }
-};
-
-loadNPause();
+whereAmI(48.43000030517578, -123.36000061035156);
