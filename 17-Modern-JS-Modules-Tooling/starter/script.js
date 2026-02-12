@@ -1,21 +1,21 @@
-// // import { addToCart, totalPrice, totalQuantity } from './shoppingCart.js';
-// // console.log('Importing module');
+// import { addToCart, totalPrice, totalQuantity } from './shoppingCart.js';
+// console.log('Importing module');
 
-// import * as ShoppingCart from './shoppingCart.js';
+import * as ShoppingCart from './shoppingCart.js';
 
-// // addToCart('bread', 4);
+// addToCart('bread', 4);
 
-// // console.log(totalPrice, totalQuantity);
+// console.log(totalPrice, totalQuantity);
 
-// console.log(ShoppingCart.totalPrice);
+console.log(ShoppingCart.totalPrice);
 
-// import add, { cart } from './shoppingCart.js';
+import add, { cart } from './shoppingCart.js';
 
-// add('pizzas', 3);
-// add('loaf of bread', 1);
-// add('jug of milk', 1);
+add('pizzas', 3);
+add('loaf of bread', 1);
+add('jug of milk', 1);
 
-// console.log(cart);
+console.log(cart);
 
 // Imports are not copies of the export, they are live connection
 
@@ -83,7 +83,7 @@ console.log(ShoppingCart2);
 import cloneDeep from './node_modules/lodash-es/cloneDeep.js';
 
 const state = {
-  card: [
+  cart: [
     { product: 'bread', quantity: 5 },
     { product: 'pizza', quantity: 5 },
   ],
@@ -96,3 +96,22 @@ state.user.loggedIn = false;
 console.log(stateClone);
 
 console.log(stateDeepClone);
+
+if (module.hot) {
+  module.hot.accept();
+}
+
+class Person {
+  greeting = 'Hey';
+  constructor(name) {
+    this.name = name;
+    console.log(`${this.greeting}, ${this.name}`);
+  }
+}
+
+const rylan = new Person('Rylan');
+
+console.log('Rylan' ?? null);
+
+console.log(cart.find(el => el.quantity >= 2));
+Promise.resolve('TEST').then(x => console.log(x));

@@ -1,10 +1,11 @@
 {
   "name": "starter",
   "version": "1.0.0",
+  "default": "index.js",
   "description": "",
-  "main": "clean.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "parcel index.html",
+    "build": "parcel build index.html"
   },
   "keywords": [],
   "author": "",
@@ -13,5 +14,8 @@
   "dependencies": {
     "leaflet": "^1.9.4",
     "lodash-es": "^4.17.23"
+  },
+  "devDependencies": {
+    "parcel": "^2.16.4"
   }
 }
